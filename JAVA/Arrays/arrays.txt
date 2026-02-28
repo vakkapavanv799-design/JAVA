@@ -1,0 +1,65 @@
+U - Chef team 
+
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t= sc.nextInt();
+        while (t-->0) {
+            long n= sc.nextLong();
+            if (n%2==0 && n % 4 != 0) {
+                System.out.println(1);
+            } else {
+                System.out.println(0);
+            }
+        }
+    }
+}
+
+
+W - Multiply the Array 
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int t = sc.nextInt();
+        while (t-- > 0) {
+            int n = sc.nextInt();
+            long product = 1;  
+            for (int i = 0; i < n; i++) {
+                int x = sc.nextInt();
+                product *= x;
+            }
+            System.out.println(product);
+        }
+    }
+}
+
+V - Solve The Case 
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        short T = sc.nextShort();
+        for (short i = 0; i < T; i++) {
+            int n = sc.nextInt();
+            int a[] = new int[n];
+            for (int j = 0; j < n; j++) {
+                a[j] = sc.nextInt();
+            }
+            System.out.print(a[0]);
+            for (int k = 1; k < n; k++) {
+                if (a[k] != a[k - 1]) {
+                    System.out.print(" " + a[k]);
+                }
+            }
+            System.out.println();
+        }
+    }
+}
