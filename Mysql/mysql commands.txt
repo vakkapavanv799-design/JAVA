@@ -1,0 +1,121 @@
+create database day1;
+use day1;
+CREATE TABLE employee (
+    eid INT,
+    fname VARCHAR(50),
+    lname VARCHAR(50),
+    age INT,
+    salary INT NULL,
+    dept VARCHAR(20),
+    doj DATE
+);
+INSERT INTO employee (eid, fname, lname, age, salary, dept, doj) VALUES
+(1, 'rajeev', 'sukla', 23, 12000, '.net', '2011-10-23'),
+(2, 'sowmya', 'kumari', 23, 19000, 'db', '2010-11-13'),
+(3, 'kishore', 'kumar', 27, 36000, 'android', '2011-10-16'),
+(4, 'abimanyu', 'biswal', 22, NULL, 'android', '2010-02-20'),
+(5, 'soni', 'kumar', 24, 21800, '.net', '2009-06-21'),
+(6, 'anu', '_singh', 22, 12000, 'db', '2010-10-23'),
+(7, '_dinesh', 'moh%anty', 23, 15000, '.net', '2009-08-26'),
+(8, 'nishala', '_kumari', 22, 18000, 'db', '2008-07-19'),
+(1, 'rajeev', 'sukla', 23, 12000, '.net', '2011-10-23');
+CREATE TABLE patient (
+    pid INT,
+    fname VARCHAR(50),
+    lname VARCHAR(50),
+    age INT,
+    bg VARCHAR(10)
+);
+ INSERT INTO patient (pid, fname, lname, age, bg) VALUES
+(1, 'madhava', 'reddy', 45, 'o+ve'),
+(2, 'abhinav', 'bandra', 45, 'o-ve'),
+(4, 'hari', 'kiran', 60, 'b-ve'),
+(3, 'madhava', 'kiran', 52, 'o+ve'),
+(5, 'veena', 'kumari', 42, NULL),
+(6, 'k_iran', 'kumar', 39, 'b-ve'),
+(2, 'abhinav', 'bandra', 45, 'o-ve'),
+(7, 'mahes%h', 'nambootri', 36, 'b+ve'),
+(8, 'rahul', 'kumar', 46, 'b-ve'),
+(9, 'bharat', 'kumar', 56, 'b-ve');
+
+
+select fname, lname, age from employee1 limit 3;
+
+select * from employee order by age desc limit 3;
+
+select * from employee limit 2,3;
+
+
+
+
+select * from employee where age>45;
+
+select * from employee where age between 40 and 50;
+
+select * from employee where age>=40 and age<=50;
+
+select * from employee where age>40 and dept!='.net';
+
+
+
+select * from employee where salary is not null;
+
+select * from employee where age=22 or age=23 or age=27;
+
+select * from employee where age in (22,23,27);
+
+
+select * from employee where age>22 order by dept desc limit 3;
+
+
+
+
+
+
+select * from employee where fname like 'r%';
+
+
+
+select fname,lname from employee where lname like '%i';
+
+
+
+select * from employee where lname like '%a_';
+
+
+
+select * from employee where fname like '%r__';
+
+
+
+select * from employee where fname like '%i%';
+
+
+select * from employee order by fname;
+
+select * from employee order by lname,fname desc;
+
+select fname,age from employee order by concat('Hello',fname,lname) desc;
+
+
+select distinct fname,age from employee;
+
+select distinct age,dept from employee;
+
+
+select column_names_used_in_group_by_clause
+or columns_linked_with_aggregate_functions
+from patient group by pid,pname;
+
+select bg, count(*) as‘count’ from patient
+group by bg;
+
+select dept from employee group by dept;
+
+select max(age) as 'max age' ,bg from patient group by bg;
+
+select lname,MIN(age) from patient group by bg,lname;
+
+select bg,max(age) as 'max age' from patient group by bg having max(age)>40;
+
+select p1.* from patient p1 where 3=(select count(distinct(p2.pid))from patient p2 where p2.age>p1.age);
