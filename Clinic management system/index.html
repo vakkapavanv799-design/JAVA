@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCare Clinic Management System</title>
+    <link rel="stylesheet" href="cms.css">
+</head>
+<body>
+    <header>
+        <div class="header">
+                <nav>
+                    <ul>
+                        <a href="#Home">Home</a>
+                        <a href="#Doctors">Doctors</a>
+                        <a href="#Appointments">Appointments</a>
+                        <a href="#About">About</a>
+                        <a href="#">Contact</a>
+                        <button onclick="login()">Login</button>
+                        <button onclick="signup()">Signup</button>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!--Home page-->
+    <section id="Home">
+        <h1>Welcome to HealthCare Clinic</h1>
+        <p> Your health is our priority. We provide comprehensive medical services with experienced doctors and modern facilities.</p>
+    </section>
+
+    <!-- Doctors -->
+    <section id="Doctors">
+        <h2>Doctors</h2>
+        <input type="text" id="doctorSearch" placeholder="search by name or specialization">
+            <div class="grid-container">
+                <div class="name">Dr. John Smith</div>
+                <div class="specialization">Cardiology</div>
+                <div class="experience">10 years</div>
+                <div class="availability available">available</div>
+            </div><br>
+            <div class="doctor-info">
+                <div class="doctor-name">Dr. Sarah Johnson</div>
+                <div class="doctor-specialization">Neurology</div>
+                <div class="doctor-experience">6 years</div>
+                <div class="availability available">available</div>
+            </div><br>
+             <div class="doctor-info">
+                <div class="doctor-name">Dr. Emily Davis</div>
+                <div class="doctor-specialization">Orthopedics</div>
+                <div class="doctor-experience">9 years</div>
+                <div class="availability available">available</div>
+            </div>
+    </section>
+
+    <!--Appointments-->
+    <section id="Appointments">
+        <h1>Book an Appointment</h1>
+        <p>Patient Name</p>
+        <input type="text" placeholder="Your Name">
+        <p>Select Doctor</p>
+        <input type="text" placeholder="Select a doctor">
+        <p>Date</p>
+        <input type="date" placeholder="Select Appointment date">
+        <p>Time</p>
+        <input type="time" placeholder="Select time">
+        <p>Reason / Notes</p>
+        <textarea class="doctor" placeholder="Describe Your symptoms"></textarea><br>
+        <button onclick="booking()">Book Appointment</button>
+    </section>
+
+    <!--About-->
+    <search id="About">
+        <h1>About HealthCare Clinic</h1>
+        <p>HealthCare Clinic has been serving the community for over 20 years with a commitment to excellence in medical care. Our state-of-the-art facility and dedicated team of healthcare professionals ensure that you receive the best possible treatment.</p><br>
+        <h3>Our History</h3>
+        <p>Founded in 2002, HealthCare Clinic started as a small practice with just two doctors. Over the years, we have grown into a comprehensive medical center with multiple departments and over 30 specialized doctors. Our journey has been guided by a simple principle: putting patients first.</p><br>
+        <h3>Mission & Vision</h3>
+        <p><strong>Our Mission:</strong>To provide accessible, high-quality healthcare services to our community with compassion, integrity, and excellence.</p>
+        <p><strong>Our Vision:</strong>To be the leading healthcare provider in the region, recognized for our patient-centered approach, innovative treatments, and commitment to community wellness.</p><br>
+
+    </search>
+</body>
+</html>

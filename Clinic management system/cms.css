@@ -1,0 +1,47 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif; /* Default font family */
+    line-height: 1.6; /* Default line height */
+    padding: 60px; /* Ensure content is below the fixed header */
+  }
+header {
+    background: #efb1b1; /* Dark background color */
+    color: #b85656; /* White text color */
+    padding: 1rem 0; /* Vertical padding */
+    position:fixed; /* Fix the header at the top */
+    width: 100%; /* Full width */
+    top: 0; /* Align to top */
+    z-index: 1000; /* Ensure it is above other elements */
+  }
+  nav ul {
+    display: flex; /* Flexbox for horizontal layout */
+    justify-content: center; /* Center the items */
+    list-style: none; /* Remove default list styling */
+  }
+  
+  nav a {
+    color: #cf1919; /* White text color */
+    padding: 0.5rem 1rem; /* Padding for links */
+    text-decoration:dotted; /* Remove underline */
+  }
+  nav a:hover {
+      background: #db9a9a; /* Darker background on hover */
+    font-family: Verdana, Geneva, Tahoma,  sans-serif;
+  }
+  #Home{
+    background-color: #db9a9a;
+    padding: 5rem 1rem;
+    text-align: center;
+  }
+  #Home h1{
+    font-size: 2.5rem;
+  }
+  #Doctors{
+    padding: 2rem; /* Padding */
+    background: #f4f4f4;
+  }
+ 
