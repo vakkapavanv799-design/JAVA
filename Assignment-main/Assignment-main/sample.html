@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern E-Commerce | Flipkart Style</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Configuration & Custom Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb', // Primary Blue
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        },
+                        accent: {
+                            500: '#f97316', // Orange for CTA/Price
+                        }
+                    },
+                    animation: {
+                        'bounce-short': 'bounce-short 0.5s ease-in-out 1',
+                        'fade-in': 'fade-in 0.5s ease-out forwards',
+                        'slide-in-right': 'slide-in-right 0.3s ease-out forwards',
+                    },
+                    keyframes: {
+                        'bounce-short': {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' },
+                        },
+                        'fade-in': {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'slide-in-right': {
+                            '0%': { transform: 'translateX(100%)' },
+                            '100%': { transform: 'translateX(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-color: #f3f4f6;
+        }
+
+        /* Page Transition Handling */
+        .page-section {
+            display: none; /* Hidden by default */
+            animation: fade-in 0.4s ease-out;
+        }
+        
+        .page-section.active {
+            display: block;
+        }
+
+        /* Image Zoom Effects */
+        .img-container {
+            overflow: hidden;
+            position: relative;
+            cursor: zoom-in;
+        }
+
+        /* 1. Hover Zoom: Image enlarges slightly */
+        .product-img {
+            transition: transform 0.3s ease;
+        }
+        .img-container:hover .product-img {
+            transform: scale(1.1);
+        }
+
+        /* 2. Focus Zoom (Magnifier Logic Styles) */
+        .img-magnifier-glass {
+            position: absolute;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: none;
+            /* Hide until active */
+            display: none; 
+            width: 100px;
+            height: 100px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+
+        /* Expand View Modal Styles */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Custom Scrollbar for Cart */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Add to Cart Button Animation State */
+        .btn-added {
+            background-color: #22c55e !important; /* Green */
+            color: white !important;
+            border-color: #22c55e !important;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800">
+
+    <!-- ================= NAVIGATION ================= -->
+    <header class="bg-brand-600 text-white sticky top-0 z-40 shadow-md">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between gap-4">
+                <!-- Logo -->
+                <a href="#" onclick="router.navigate('home')" class="text-2xl font-bold italic tracking-tighter flex items-center gap-1">
+                    <i class="fa-solid fa-cart-shopping"></i> ShopZone
+                </a>
+
+                <!-- Search Bar (Desktop) -->
+                <div class="hidden md:flex flex-1 max-w-xl relative">
+                    <input type="text" placeholder="Search for products, brands and more" 
+                        class="w-full pl-4 pr-12 py-2 rounded-md text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent-500">
+                    <button class="absolute right-0 top-0 h-full px-4 text-slate-400 hover:text-accent-500">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Nav Links -->
+                <nav class="flex items-center gap-4 md:gap-6 font-medium text-sm md:text-base">
+                    <!-- Login / User Profile -->
+                    <div id="auth-container">
+                        <button onclick="router.navigate('login')" class="hover:text-accent-500 transition flex items-center gap-1">
+                            <i class="fa-regular fa-user"></i> Login
+                        </button>
+                    </div>
+
+                    <!-- Cart -->
+                    <button onclick="cartUI.toggleCart()" class="relative hover:text-accent-500 transition flex items-center gap-1">
+                        <i class="fa-solid fa-cart-shopping text-lg"></i>
+                        <span>Cart</span>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-accent-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Mobile Search (Visible only on small screens) -->
+            <div class="md:hidden mt-3 relative">
+                <input type="text" placeholder="Search..." class="w-full pl-4 pr-10 py-2 rounded-md text-slate-800 text-sm">
+                <button class="absolute right-0 top-0 h-full px-3 text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Categories Nav -->
+        <div class="bg-brand-700 text-sm overflow-x-auto">
+            <div class="container mx-auto px-4 flex gap-6 py-2 whitespace-nowrap hide-scrollbar">
+                <button onclick="router.navigate('category', 'fashion')" class="hover:text-accent-400 transition">Fashion</button>
+                <button onclick="router.navigate('category', 'mobiles')" class="hover:text-accent-400 transition">Mobiles & Tablets</button>
+                <button onclick="router.navigate('category', 'electronics')" class="hover:text-accent-400 transition">Electronics</button>
+                <button onclick="router.navigate('category', 'tv')" class="hover:text-accent-400 transition">TV & Appliances</button>
+                <button onclick="router.navigate('category', 'home')" class="hover:text-accent-400 transition">Home & Furniture</button>
+                <button onclick="router.navigate('contact')" class="hover:text-accent-400 transition ml-auto">Contact Us</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN CONTENT AREA ================= -->
+    <main class="flex-grow container mx-auto px-4 py-6 relative">
+
+        <!-- 1. HOME PAGE -->
+        <section id="home-page" class="page-section active">
+            <!-- Hero Banner -->
+            <div class="w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-lg mb-8 relative group">
+                <img src="https://picsum.photos/seed/hero1/1200/400" alt="Sale Banner" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex flex-col justify-center px-8 md:px-16">
+                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-2">Big Billion Days!</h2>
+                    <p class="text-white text-lg md:text-xl mb-6">Up to 80% Off on Electronics & Fashion</p>
+                    <button onclick="router.navigate('category', 'electronics')" class="bg-accent-500 hover:bg-accent-600 text-white w-fit px-6 py-2 rounded font-bold transition transform hover:-translate-y-1">
+                        Shop Now
+                    </button>
+                </div>
+            </div>
+
+            <!-- Offers Row -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer flex flex-col items-center text-center" onclick="router.navigate('category', 'mobiles')">
+                    <img src="https://picsum.photos/seed/off1/150/150" class="h-20 w-20 object-contain mb-2">
+                    <h3 class="font-bold text-sm">Top Smartphones</h3>
+                    <span class="text-accent-500 text-xs font-semibold">From ₹7,999</span>
+                </div>
+                <div class="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer flex flex-col items-center text-center" onclick="router.navigate('category', 'fashion')">
+                    <img src="https://picsum.photos/seed/off2/150/150" class="h-20 w-20 object-contain mb-2">
+                    <h3 class="font-bold text-sm">Fashion Fiesta</h3>
+                    <span class="text-accent-500 text-xs font-semibold">Min 50% Off</span>
+                </div>
+                <div class="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer flex flex-col items-center text-center" onclick="router.navigate('category', 'electronics')">
+                    <img src="https://picsum.photos/seed/off3/150/150" class="h-20 w-20 object-contain mb-2">
+                    <h3 class="font-bold text-sm">Best Laptops</h3>
+                    <span class="text-accent-500 text-xs font-semibold">Shop Now</span>
+                </div>
+                <div class="bg-white p-4 rounded shadow hover:shadow-md transition cursor-pointer flex flex-col items-center text-center" onclick="router.navigate('category', 'home')">
+                    <img src="https://picsum.photos/seed/off4/150/150" class="h-20 w-20 object-contain mb-2">
+                    <h3 class="font-bold text-sm">Home Decor</h3>
+                    <span class="text-accent-500 text-xs font-semibold">New Arrivals</span>
+                </div>
+            </div>
+
+            <!-- Featured Products (Randomly picked from Data) -->
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-accent-500 pl-3">Featured Products</h2>
+            <div id="home-featured-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- 2. LOGIN PAGE -->
+        <section id="login-page" class="page-section">
+            <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-xl mt-10">
+                <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Login to ShopZone</h2>
+                <form id="login-form" onsubmit="auth.login(event)">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-2 border rounded focus:outline-none focus:border-brand-500" placeholder="Enter email">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                        <input type="password" id="login-pass" required class="w-full px-4 py-2 border rounded focus:outline-none focus:border-brand-500" placeholder="Enter password">
+                    </div>
+                    <button type="submit" class="w-full bg-accent-500 hover:bg-accent-600 text-white font-bold py-2 rounded transition duration-300">
+                        Login
+                    </button>
+                    <p class="mt-4 text-xs text-center text-gray-500">
+                        For demo: Use any valid email format & password > 3 chars.
+                    </p>
+                </form>
+            </div>
+        </section>
+
+        <!-- 3. CATEGORY PAGE (Dynamic: Fashion, Mobiles, etc.) -->
+        <section id="category-page" class="page-section">
+            <div class="flex items-center justify-between mb-6">
+                <h2 id="category-title" class="text-2xl font-bold border-l-4 border-brand-600 pl-3">Category Name</h2>
+                <span class="text-sm text-gray-500">Showing results</span>
+            </div>
+            
+            <!-- Filters (Visual Only) -->
+            <div class="bg-white p-3 rounded shadow-sm mb-6 hidden md:flex gap-4 text-sm overflow-x-auto">
+                <select class="border rounded px-2 py-1 bg-gray-50"><option>Sort By: Relevance</option><option>Price: Low to High</option><option>Price: High to Low</option></select>
+                <button class="border rounded px-3 py-1 hover:bg-gray-100">Brand</button>
+                <button class="border rounded px-3 py-1 hover:bg-gray-100">Rating 4+</button>
+                <button class="border rounded px-3 py-1 hover:bg-gray-100">Discount</button>
+            </div>
+
+            <div id="category-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <!-- Products injected here -->
+            </div>
+        </section>
+
+        <!-- 4. CONTACT PAGE -->
+        <section id="contact-page" class="page-section">
+            <div class="max-w-4xl mx-auto bg-white rounded shadow-md overflow-hidden flex flex-col md:flex-row">
+                <div class="bg-brand-600 text-white p-8 md:w-1/3 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">Contact Us</h2>
+                        <p class="mb-4 text-brand-100">Have a question or feedback? We'd love to hear from you.</p>
+                    </div>
+                    <div class="mt-8">
+                        <p class="mb-2"><i class="fa-solid fa-phone w-6"></i> +1 234 567 890</p>
+                        <p class="mb-2"><i class="fa-solid fa-envelope w-6"></i> support@shopzone.com</p>
+                        <p><i class="fa-solid fa-location-dot w-6"></i> 123 Tech Park, Bangalore</p>
+                    </div>
+                </div>
+                <div class="p-8 md:w-2/3">
+                    <form onsubmit="event.preventDefault(); toast.show('Message sent successfully!', 'success')">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <input type="text" placeholder="Name" class="border rounded p-2 w-full" required>
+                            <input type="email" placeholder="Email" class="border rounded p-2 w-full" required>
+                        </div>
+                        <input type="text" placeholder="Subject" class="border rounded p-2 w-full mb-4" required>
+                        <textarea rows="5" placeholder="Your Message" class="border rounded p-2 w-full mb-4" required></textarea>
+                        <button type="submit" class="bg-brand-600 text-white px-6 py-2 rounded hover:bg-brand-700 transition">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="bg-brand-900 text-white py-10 mt-auto">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 text-sm">
+            <div>
+                <h3 class="font-bold text-lg mb-4">About</h3>
+                <p class="text-gray-400">ShopZone is a leading e-commerce platform designed for frontend engineering demos.</p>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg mb-4">Help</h3>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white">Payments</a></li>
+                    <li><a href="#" class="hover:text-white">Shipping</a></li>
+                    <li><a href="#" class="hover:text-white">Returns</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg mb-4">Policy</h3>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white">Return Policy</a></li>
+                    <li><a href="#" class="hover:text-white">Terms of Use</a></li>
+                    <li><a href="#" class="hover:text-white">Privacy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg mb-4">Social</h3>
+                <div class="flex gap-4 text-xl">
+                    <a href="#" class="hover:text-accent-500"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="hover:text-accent-500"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="hover:text-accent-500"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center text-gray-500 mt-8 text-xs border-t border-gray-700 pt-4">
+            &copy; 2023 ShopZone. Frontend Assessment Demo.
+        </div>
+    </footer>
+
+    <!-- ================= UI COMPONENTS (Floating/Modals) ================= -->
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300">
+        <div class="bg-gray-800 text-white px-6 py-3 rounded shadow-lg flex items-center gap-3">
+            <i id="toast-icon" class="fa-solid fa-check-circle text-green-400"></i>
+            <span id="toast-msg">Notification</span>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar (Off-canvas) -->
+    <div id="cart-sidebar" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50" onclick="cartUI.toggleCart()"></div>
+        <!-- Drawer -->
+        <div class="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 translate-x-full flex flex-col" id="cart-drawer">
+            <div class="p-4 border-b flex justify-between items-center bg-brand-600 text-white">
+                <h2 class="font-bold text-lg"><i class="fa-solid fa-shopping-cart mr-2"></i> My Cart</h2>
+                <button onclick="cartUI.toggleCart()" class="text-2xl hover:text-gray-200">&times;</button>
+            </div>
+            
+            <!-- Cart Items Area -->
+            <div id="cart-items" class="flex-1 overflow-y-auto p-4 custom-scroll space-y-4">
+                <!-- Items injected via JS -->
+                <div class="text-center text-gray-500 mt-10">Your cart is empty!</div>
+            </div>
+
+            <!-- Footer / Checkout -->
+            <div class="p-4 border-t bg-gray-50">
+                <div class="flex justify-between mb-2 text-lg font-bold">
+                    <span>Total:</span>
+                    <span id="cart-total">₹0</span>
+                </div>
+                <button onclick="cartUI.checkout()" class="w-full bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 rounded shadow transition">
+                    Place Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Expand Modal (Lightbox) -->
+    <div id="expand-modal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
+        <button onclick="expandView.close()" class="absolute top-5 right-5 text-white text-4xl hover:text-gray-300">&times;</button>
+        <img id="expand-img" src="" alt="Expanded View" class="max-h-[90vh] max-w-[90vw] rounded shadow-2xl object-contain animate-fade-in">
+    </div>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // --- 1. MOCK DATA ---
+        const products = [
+            // Fashion
+            { id: 101, category: 'fashion', name: "Men's Casual Shirt", price: 999, original: 1999, discount: 50, img: "https://picsum.photos/seed/shirt/300/400" },
+            { id: 102, category: 'fashion', name: "Running Shoes", price: 1499, original: 2999, discount: 50, img: "https://picsum.photos/seed/shoes/300/400" },
+            { id: 103, category: 'fashion', name: "Women's Summer Dress", price: 799, original: 1599, discount: 50, img: "https://picsum.photos/seed/dress/300/400" },
+            { id: 104, category: 'fashion', name: "Leather Wallet", price: 499, original: 999, discount: 50, img: "https://picsum.photos/seed/wallet/300/400" },
+            // Mobiles
+            { id: 201, category: 'mobiles', name: "Smartphone Pro X", price: 45000, original: 55000, discount: 18, img: "https://picsum.photos/seed/phone1/300/400" },
+            { id: 202, category: 'mobiles', name: "Budget Phone Y", price: 12000, original: 15000, discount: 20, img: "https://picsum.photos/seed/phone2/300/400" },
+            { id: 203, category: 'mobiles', name: "Wireless Earbuds", price: 2999, original: 5999, discount: 50, img: "https://picsum.photos/seed/buds/300/400" },
+            { id: 204, category: 'mobiles', name: "Fast Charger", price: 999, original: 1999, discount: 50, img: "https://picsum.photos/seed/charger/300/400" },
+            // Electronics
+            { id: 301, category: 'electronics', name: "Gaming Laptop", price: 85000, original: 100000, discount: 15, img: "https://picsum.photos/seed/laptop/300/400" },
+            { id: 302, category: 'electronics', name: "DSLR Camera", price: 45000, original: 60000, discount: 25, img: "https://picsum.photos/seed/camera/300/400" },
+            { id: 303, category: 'electronics', name: "Smart Watch", price: 3500, original: 7000, discount: 50, img: "https://picsum.photos/seed/watch/300/400" },
+            // TV
+            { id: 401, category: 'tv', name: "43 inch 4K TV", price: 28000, original: 40000, discount: 30, img: "https://picsum.photos/seed/tv1/300/400" },
+            { id: 402, category: 'tv', name: "Refrigerator", price: 18000, original: 25000, discount: 28, img: "https://picsum.photos/seed/fridge/300/400" },
+            { id: 403, category: 'tv', name: "Split AC", price: 35000, original: 50000, discount: 30, img: "https://picsum.photos/seed/ac/300/400" },
+            // Home
+            { id: 501, category: 'home', name: "Modern Sofa", price: 15000, original: 30000, discount: 50, img: "https://picsum.photos/seed/sofa/300/400" },
+            { id: 502, category: 'home', name: "Dining Table", price: 12000, original: 20000, discount: 40, img: "https://picsum.photos/seed/table/300/400" },
+        ];
+
+        // --- 2. STATE & UTILS ---
+        const state = {
+            cart: JSON.parse(localStorage.getItem('sz_cart')) || [],
+            user: JSON.parse(localStorage.getItem('sz_user')) || null
+        };
+
+        const formatPrice = (p) => `₹${p.toLocaleString('en-IN')}`;
+
+        // --- 3. ROUTING SYSTEM ---
+        const router = {
+            navigate: (pageId, param = null) => {
+                // Hide all pages
+                document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+                
+                // Show target
+                const target = document.getElementById(`${pageId}-page`);
+                if(target) target.classList.add('active');
+
+                // Page specific logic
+                window.scrollTo(0,0);
+                
+                if (pageId === 'category') {
+                    renderCategoryPage(param);
+                } else if (pageId === 'home') {
+                    renderFeaturedProducts();
+                }
+            }
+        };
+
+        // --- 4. AUTHENTICATION ---
+        const auth = {
+            login: (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const pass = document.getElementById('login-pass').value;
+
+                // Validation
+                if (email.includes('@') && pass.length > 3) {
+                    state.user = { email: email, name: email.split('@')[0] };
+                    localStorage.setItem('sz_user', JSON.stringify(state.user));
+                    auth.updateUI();
+                    toast.show('Login Successful!', 'success');
+                    router.navigate('home');
+                } else {
+                    toast.show('Invalid email or password (too short)', 'error');
+                }
+            },
+            logout: () => {
+                state.user = null;
+                localStorage.removeItem('sz_user');
+                auth.updateUI();
+                toast.show('Logged out', 'success');
+            },
+            updateUI: () => {
+                const container = document.getElementById('auth-container');
+                if (state.user) {
+                    container.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="hidden md:inline text-accent-400 font-bold">Hi, ${state.user.name}</span>
+                            <button onclick="auth.logout()" class="text-xs bg-brand-700 px-2 py-1 rounded hover:bg-brand-800">Logout</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <button onclick="router.navigate('login')" class="hover:text-accent-500 transition flex items-center gap-1">
+                            <i class="fa-regular fa-user"></i> Login
+                        </button>
+                    `;
+                }
+            }
+        };
+
+        // --- 5. CART LOGIC ---
+        const cartUI = {
+            toggleCart: () => {
+                const sidebar = document.getElementById('cart-sidebar');
+                const drawer = document.getElementById('cart-drawer');
+                
+                if (sidebar.classList.contains('hidden')) {
+                    sidebar.classList.remove('hidden');
+                    // Small delay to allow display:block to apply before transition
+                    setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
+                    cartUI.renderItems();
+                } else {
+                    drawer.classList.add('translate-x-full');
+                    setTimeout(() => sidebar.classList.add('hidden'), 300);
+                }
+            },
+            add: (productId) => {
+                const product = products.find(p => p.id === productId);
+                if (!product) return;
+
+                const existing = state.cart.find(item => item.id === productId);
+                if (existing) {
+                    existing.qty++;
+                } else {
+                    state.cart.push({ ...product, qty: 1 });
+                }
+                
+                cartUI.save();
+                
+                // Animation & Feedback
+                const btn = document.getElementById(`btn-add-${productId}`);
+                if(btn) {
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i> Added`;
+                    btn.classList.add('btn-added', 'animate-bounce-short');
+                    setTimeout(() => {
+                        btn.classList.remove('btn-added', 'animate-bounce-short');
+                        btn.innerHTML = `Add to Cart`;
+                    }, 2000);
+                }
+                toast.show('Item added to cart');
+            },
+            remove: (productId) => {
+                state.cart = state.cart.filter(item => item.id !== productId);
+                cartUI.save();
+                cartUI.renderItems();
+            },
+            updateQty: (productId, change) => {
+                const item = state.cart.find(i => i.id === productId);
+                if (item) {
+                    item.qty += change;
+                    if (item.qty <= 0) cartUI.remove(productId);
+                    else {
+                        cartUI.save();
+                        cartUI.renderItems();
+                    }
+                }
+            },
+            save: () => {
+                localStorage.setItem('sz_cart', JSON.stringify(state.cart));
+                cartUI.updateBadge();
+            },
+            updateBadge: () => {
+                const badge = document.getElementById('cart-count');
+                const count = state.cart.reduce((sum, item) => sum + item.qty, 0);
+                badge.innerText = count;
+                badge.classList.toggle('hidden', count === 0);
+            },
+            renderItems: () => {
+                const container = document.getElementById('cart-items');
+                const totalEl = document.getElementById('cart-total');
+                
+                if (state.cart.length === 0) {
+                    container.innerHTML = `<div class="text-center text-gray-500 mt-10 flex flex-col items-center"><i class="fa-solid fa-cart-arrow-down text-4xl mb-4 text-gray-300"></i><p>Your cart is empty!</p><button onclick="router.navigate('home'); cartUI.toggleCart()" class="text-brand-600 mt-2 hover:underline">Shop Now</button></div>`;
+                    totalEl.innerText = formatPrice(0);
+                    return;
+                }
+
+                let total = 0;
+                container.innerHTML = state.cart.map(item => {
+                    total += item.price * item.qty;
+                    return `
+                    <div class="flex gap-4 bg-white p-3 rounded border shadow-sm animate-slide-in-right">
+                        <img src="${item.img}" class="w-16 h-20 object-cover rounded">
+                        <div class="flex-1">
+                            <h4 class="font-medium text-sm line-clamp-2">${item.name}</h4>
+                            <div class="text-accent-500 font-bold text-sm mt-1">${formatPrice(item.price)}</div>
+                            <div class="flex items-center gap-3 mt-2">
+                                <button onclick="cartUI.updateQty(${item.id}, -1)" class="w-6 h-6 bg-gray-200 rounded text-gray-700 hover:bg-gray-300">-</button>
+                                <span class="text-sm font-semibold">${item.qty}</span>
+                                <button onclick="cartUI.updateQty(${item.id}, 1)" class="w-6 h-6 bg-gray-200 rounded text-gray-700 hover:bg-gray-300">+</button>
+                                <button onclick="cartUI.remove(${item.id})" class="ml-auto text-red-500 text-xs hover:underline">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+                
+                totalEl.innerText = formatPrice(total);
+            },
+            checkout: () => {
+                if(!state.user) {
+                    cartUI.toggleCart();
+                    toast.show('Please login to checkout', 'error');
+                    router.navigate('login');
+                    return;
+                }
+                if(state.cart.length === 0) return;
+                
+                // Simulate checkout
+                const btn = document.querySelector('#cart-drawer button.bg-accent-500');
+                const originalText = btn.innerText;
+                btn.innerText = "Processing...";
+                setTimeout(() => {
+                    state.cart = [];
+                    cartUI.save();
+                    cartUI.renderItems();
+                    cartUI.toggleCart();
+                    btn.innerText = originalText;
+                    toast.show('Order placed successfully!', 'success');
+                }, 1500);
+            }
+        };
+
+        // --- 6. PRODUCT RENDERING & INTERACTIONS ---
+        
+        // Helper to generate HTML for product card
+        function createProductCard(product) {
+            return `
+            <div class="bg-white rounded-lg shadow hover:shadow-xl transition-all duration-300 group flex flex-col h-full relative">
+                <!-- Image Area -->
+                <div class="img-container w-full h-48 bg-gray-100 rounded-t-lg relative" 
+                     onmousemove="zoomLogic.move(event, ${product.id})" 
+                     onmouseleave="zoomLogic.reset(${product.id})">
+                    
+                    <img src="${product.img}" alt="${product.name}" id="img-${product.id}" 
+                         class="product-img w-full h-full object-cover">
+                    
+                    <!-- Discount Badge -->
+                    <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-sm shadow">
+                        ${product.discount}% OFF
+                    </span>
+
+                    <!-- Expand View Button -->
+                    <button onclick="expandView.open('${product.img}')" class="absolute top-2 right-2 bg-white/80 hover:bg-white p-1.5 rounded-full shadow text-gray-700 opacity-0 group-hover:opacity-100 transition">
+                        <i class="fa-solid fa-expand"></i>
+                    </button>
+                </div>
+
+                <!-- Details -->
+                <div class="p-4 flex flex-col flex-1">
+                    <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-2 h-10">${product.name}</h3>
+                    
+                    <div class="mt-auto">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-lg font-bold text-gray-900">${formatPrice(product.price)}</span>
+                            <span class="text-xs text-gray-400 line-through">${formatPrice(product.original)}</span>
+                        </div>
+                        
+                        <button id="btn-add-${product.id}" onclick="cartUI.add(${product.id})" 
+                                class="w-full py-2 px-4 border border-brand-600 text-brand-600 font-medium rounded hover:bg-brand-50 active:scale-95 transition-colors flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderFeaturedProducts() {
+            const container = document.getElementById('home-featured-grid');
+            // Pick first 8 random items
+            const featured = products.slice(0, 8);
+            container.innerHTML = featured.map(createProductCard).join('');
+        }
+
+        function renderCategoryPage(category) {
+            const container = document.getElementById('category-grid');
+            const title = document.getElementById('category-title');
+            
+            const filtered = products.filter(p => p.category === category);
+            const titles = {
+                'fashion': 'Fashion & Accessories',
+                'mobiles': 'Mobiles & Tablets',
+                'electronics': 'Electronics & Gadgets',
+                'tv': 'TV & Appliances',
+                'home': 'Home & Furniture'
+            };
+
+            title.innerText = titles[category] || 'Products';
+            
+            if (filtered.length > 0) {
+                container.innerHTML = filtered.map(createProductCard).join('');
+            } else {
+                container.innerHTML = `<p class="col-span-full text-center py-10 text-gray-500">No products found in this category.</p>`;
+            }
+        }
+
+        // --- 7. ANIMATIONS & ZOOM LOGIC ---
+        
+        // Magnifier Logic
+        const zoomLogic = {
+            move: (e, id) => {
+                // This logic simulates "Focus Zoom" (Lens)
+                // In a single file simple version, we can manipulate the image transform origin
+                // based on mouse position relative to the container.
+                
+                const container = e.currentTarget;
+                const img = document.getElementById(`img-${id}`);
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left; // x position within the element.
+                const y = e.clientY - rect.top;  // y position within the element.
+
+                // Calculate percentage
+                const xPercent = (x / rect.width) * 100;
+                const yPercent = (y / rect.height) * 100;
+
+                // Apply transform origin to the image
+                img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                img.style.transform = "scale(2)"; // Zoom in
+            },
+            reset: (id) => {
+                const img = document.getElementById(`img-${id}`);
+                img.style.transformOrigin = "center center";
+                img.style.transform = "scale(1)";
+            }
+        };
+
+        // Expand View (Modal)
+        const expandView = {
+            open: (src) => {
+                const modal = document.getElementById('expand-modal');
+                const img = document.getElementById('expand-img');
+                img.src = src;
+                modal.classList.remove('hidden');
+            },
+            close: () => {
+                document.getElementById('expand-modal').classList.add('hidden');
+            }
+        };
+
+        // Toast Notification
+        const toast = {
+            show: (msg, type = 'normal') => {
+                const el = document.getElementById('toast');
+                const txt = document.getElementById('toast-msg');
+                const icon = document.getElementById('toast-icon');
+                
+                txt.innerText = msg;
+                if(type === 'error') {
+                    icon.className = "fa-solid fa-circle-exclamation text-red-400";
+                } else if (type === 'success') {
+                    icon.className = "fa-solid fa-circle-check text-green-400";
+                } else {
+                    icon.className = "fa-solid fa-bell text-blue-400";
+                }
+
+                el.classList.remove('translate-y-20', 'opacity-0');
+                
+                setTimeout(() => {
+                    el.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+        };
+
+        // --- 8. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check auth
+            auth.updateUI();
+            // Update cart badge
+            cartUI.updateBadge();
+            // Initial render
+            renderFeaturedProducts();
+        });
+
+    </script>
+</body>
+</html>
